@@ -46,29 +46,13 @@ resource "azurerm_app_service" "Techies-as" {
 
   site_config {
     app_command_line = ""
-    linux_fx_version = "DOCKER|appsvcsample/static-site"
+    linux_fx_version = "DOCKER|ravianxreaver/testnodeapp"
   }
 
   app_settings = {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
     "DOCKER_REGISTRY_SERVER_URL"          = "https://index.docker.io"
   }
-}
-
-#Subnet
-resource "azurerm_subnet" "Techies-subnet" {
-  name                 = "Techies-subnet"
-  resource_group_name  = "${azurerm_resource_group.Techies-rg.name}"
-  virtual_network_name = "${azurerm_virtual_network.Techies-vnet.name}"
-  address_prefix       = "10.0.1.0/24"
-}
-
-#Public IP for App-service
-resource "azurerm_public_ip" "Techies-ip" {
-  name                = "Techies-ip"
-  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
-  location            = "${azurerm_resource_group.Techies-rg.location}"
-  allocation_method   = "Dynamic"
 }
 
 #endregion
@@ -78,10 +62,10 @@ resource "azurerm_public_ip" "Techies-ip" {
 #region MYSQL Server Configuration  
 
 #Create MySQL Server
-resource "azurerm_mysql_server" "Techies_mysql_server" {
-  name                = "Techies_mysql_server"
-  location            = "${azurerm_resource_group.Techies_rg.location}"
-  resource_group_name = "${azurerm_resource_group.Techies_rg.name}"
+resource "azurerm_mysql_server" "Techies-mysql-server" {
+  name                = "techies-mysql-server"
+  location            = "${azurerm_resource_group.Techies-rg.location}"
+  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
 
   sku {
     name     = "B_Gen5_2"
@@ -102,11 +86,11 @@ resource "azurerm_mysql_server" "Techies_mysql_server" {
   ssl_enforcement              = "Enabled"
 }
 
-#Subnet
-resource "azurerm_subnet" "Techies_db" {
-  name                 = "Techies_db"
-  resource_group_name  = "${azurerm_resource_group.Techies_rg.name}"
-  virtual_network_name = "${azurerm_virtual_network.Techies_vn.name}"
+#Subnet for mssql
+resource "azurerm_subnet" "Techies-db" {
+  name                 = "Techies-db-sub"
+  resource_group_name  = "${azurerm_resource_group.Techies-rg.name}"
+  virtual_network_name = "${azurerm_virtual_network.Techies-vnet.name}"
   address_prefix       = "10.0.2.0/24"
   service_endpoints    = ["Microsoft.Sql"]
 }
@@ -114,8 +98,8 @@ resource "azurerm_subnet" "Techies_db" {
 #Firewall Rule
 resource "azurerm_mysql_firewall_rule" "Techies_mysql_firewall" {
   name                = "Techies_mysql_firewall"
-  resource_group_name = "${azurerm_resource_group.Techies_rg.name}"
-  server_name         = "${azurerm_mysql_server.Techies_mysql_server.name}"
+  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
+  server_name         = "${azurerm_mysql_server.Techies-mysql-server.name}"
   start_ip_address    = "10.0.2.20"
   end_ip_address      = "10.0.2.20"
 }
@@ -123,9 +107,9 @@ resource "azurerm_mysql_firewall_rule" "Techies_mysql_firewall" {
 #Virtual Network Rule
 resource "azurerm_mysql_virtual_network_rule" "mysql-vnet-rule" {
   name                = "mysql-vnet-rule"
-  resource_group_name = "${azurerm_resource_group.Techies_rg.name}"
-  server_name         = "${azurerm_mysql_server.Techies_mysql_server.name}"
-  subnet_id           = "${azurerm_subnet.Techies_db.id}"
+  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
+  server_name         = "${azurerm_mysql_server.Techies-mysql-server.name}"
+  subnet_id           = "${azurerm_subnet.Techies-db.id}"
 }
 
 #Public IP for Network Gateway
@@ -135,6 +119,13 @@ resource "azurerm_public_ip" "Techies-pivg" {
   resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
 
   allocation_method = "Dynamic"
+}
+
+resource "azurerm_subnet" "GatewaySubnet" {
+  name                 = "GatewaySubnet"
+  resource_group_name  = "${azurerm_resource_group.Techies-rg.name}"
+  virtual_network_name = "${azurerm_virtual_network.Techies-vnet.name}"
+  address_prefix       = "10.0.1.0/24"
 }
 
 #Network gateway
@@ -154,7 +145,7 @@ resource "azurerm_virtual_network_gateway" "Techies-vng" {
     name                          = "vnetGatewayConfig"
     public_ip_address_id          = "${azurerm_public_ip.Techies-pivg.id}"
     private_ip_address_allocation = "Dynamic"
-    subnet_id                     = "${azurerm_subnet.Techies-subnet.id}"
+    subnet_id                     = "${azurerm_subnet.GatewaySubnet.id}"
   }
 
   vpn_client_configuration {
@@ -196,8 +187,8 @@ EOF
 #Create Database
 resource "azurerm_mysql_database" "Techies_db" {
   name                = "Techies_db"
-  resource_group_name = "${azurerm_resource_group.Techies_rg.name}"
-  server_name         = "${azurerm_mysql_server.Techies_mysql_server.name}"
+  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
+  server_name         = "${azurerm_mysql_server.Techies-mysql-server.name}"
   charset             = "utf8"
   collation           = "utf8_unicode_ci"
 } 
