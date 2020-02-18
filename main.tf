@@ -63,7 +63,7 @@ resource "azurerm_app_service" "Techies-as" {
 
 #Create MySQL Server
 resource "azurerm_mysql_server" "Techies-mysql-server" {
-  name                = "techies-mysql-server"
+  name                = "techies-mysql-serverx1"
   location            = "${azurerm_resource_group.Techies-rg.location}"
   resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
 
