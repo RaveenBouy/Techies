@@ -71,83 +71,6 @@ resource "azurerm_public_ip" "Techies-ip" {
   allocation_method   = "Dynamic"
 }
 
-#locals block makes this more maintainable
-locals {
-  backend_address_pool_name      = "${azurerm_virtual_network.Techies-vnet.name}-beap"
-  frontend_port_name             = "${azurerm_virtual_network.Techies-vnet.name}-feport"
-  frontend_ip_configuration_name = "${azurerm_virtual_network.Techies-vnet.name}-feip"
-  http_setting_name              = "${azurerm_virtual_network.Techies-vnet.name}-be-htst"
-  listener_name                  = "${azurerm_virtual_network.Techies-vnet.name}-httplstn"
-  request_routing_rule_name      = "${azurerm_virtual_network.Techies-vnet.name}-rqrt"
-  redirect_configuration_name    = "${azurerm_virtual_network.Techies-vnet.name}-rdrcfg"
-}
-
-# Configure application gateway
-resource "azurerm_application_gateway" "Techies-agw" {
-  name                = "Techies-agw"
-  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
-  location            = "${azurerm_resource_group.Techies-rg.location}"
-
-  sku {
-    name     = "Standard_Small"
-    tier     = "Standard"
-    capacity = 2
-  }
-
-  gateway_ip_configuration {
-    name      = "gateway-ip-configuration"
-    subnet_id = "${azurerm_subnet.Techies-subnet.id}"
-  }
-
-  frontend_port {
-    name = "${local.frontend_port_name}"
-    port = 80
-  }
-
-  frontend_ip_configuration {
-    name                 = "${local.frontend_ip_configuration_name}"
-    public_ip_address_id = "${azurerm_public_ip.Techies-ip.id}"
-  }
-
-  probe {
-    name                = "probe"
-    protocol            = "http"
-    path                = "/"
-    host                = "${azurerm_app_service.Techies-as.name}.azurewebsites.net"
-    interval            = "30"
-    timeout             = "30"
-    unhealthy_threshold = "3"
-  }
-
-  backend_address_pool {
-    name = "${local.backend_address_pool_name}"
-  }
-
-  backend_http_settings {
-    name                  = "${local.http_setting_name}"
-    cookie_based_affinity = "Disabled"
-    path                  = "/path1/"
-    port                  = 80
-    protocol              = "Http"
-    request_timeout       = 3
-  }
-
-  http_listener {
-    name                           = "${local.listener_name}"
-    frontend_ip_configuration_name = "${local.frontend_ip_configuration_name}"
-    frontend_port_name             = "${local.frontend_port_name}"
-    protocol                       = "Http"
-  }
-
-  request_routing_rule {
-    name                       = "${local.request_routing_rule_name}"
-    rule_type                  = "Basic"
-    http_listener_name         = "${local.listener_name}"
-    backend_address_pool_name  = "${local.backend_address_pool_name}"
-    backend_http_settings_name = "${local.http_setting_name}"
-  }
-}
-
 #endregion
 
 ##############################################################################
@@ -263,7 +186,6 @@ WsfMLH4JCLa/tRYL+Rw/N3ybCkDp00s0WUZ+AoDywSl0Q/ZEnNY0MsFiw6LyIdbq
 M/s/1JRtO3bDSzD9TazRVzn2oBqzSa8VgIo5C1nOnoAKJTlsClJKvIhnRlaLQqk=
 EOF
 }
-
     revoked_certificate {
     name       = "Verizon-Global-Root-CA"
     thumbprint = "912198EEF23DCAC40939312FEE97DD560BAE49B1"
