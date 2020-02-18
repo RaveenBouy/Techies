@@ -1,0 +1,8 @@
+subscription_id = "b3d4c39c-af9c-4d9b-8733-3961dccd57db"
+client_id = "0d95fbc9-44a0-4f5e-86ac-6c95575690fc"
+client_secret = "26f2891b-9232-4bbb-b9f5-f134fdca13e1"
+tenant_id = "aaf4ca42-beb5-4378-8e28-98199f78d72f"
+mysql_user = "admin"
+mysql_password = "admin"
+version = "5.7"
+ssl_enforcement = "Enabled"
