@@ -1,315 +1,84 @@
-# **Techies**
+# <center> **Techies** </center>
 
-Introduction
+1.0 Introduction
 -------------
 Cloud computing is a recent technology paradigm aimed at providing Information Technology on-demand services. Aspects of scalability, elasticity, payment based on usage are the main reasons for the successful widespread adoption of cloud infrastructures. Cloud computing model aims to provide two beneﬁts: cost reduction and ﬂexibility. The ﬁrst one consists in to reduce the cost of acquisition and composition of all infrastructure required to meet the needs of businesses. Thereby, our clients do not need to acquire a complex infrastructure to host their applications. As we(Techies) have been providing client solutions around the globe for over 4 years, we promise to provide a world class customer experience. 
 
-Architectural Diagram
--------------
-![](https://i.imgur.com/VLI7sTP.png) Fig:1.1
 
-
-
-
-
-
-
-
-
-
-- Support Standard Markdown / CommonMark and GFM(GitHub Flavored Markdown);
-- Full-featured: Real-time Preview, Image (cross-domain) upload, Preformatted text/Code blocks/Tables insert, Code fold, Search replace, Read only, Themes, Multi-languages, L18n, HTML entities, Code syntax highlighting...;
-- Markdown Extras : Support ToC (Table of Contents), Emoji, Task lists, @Links...;
-- Compatible with all major browsers (IE8+), compatible Zepto.js and iPad;
-- Support identification, interpretation, fliter of the HTML tags;
-- Support TeX (LaTeX expressions, Based on KaTeX), Flowchart and Sequence Diagram of Markdown extended syntax;
-- Support AMD/CMD (Require.js & Sea.js) Module Loader, and Custom/define editor plugins;
-
-# Editor.md
-
-
-![](https://img.shields.io/github/stars/pandao/editor.md.svg) ![](https://img.shields.io/github/forks/pandao/editor.md.svg) ![](https://img.shields.io/github/tag/pandao/editor.md.svg) ![](https://img.shields.io/github/release/pandao/editor.md.svg) ![](https://img.shields.io/github/issues/pandao/editor.md.svg) ![](https://img.shields.io/bower/v/editor.md.svg)
-
-
-
-##Headers (Underline)
-
-H1 Header (Underline)
-=============
-
-H2 Header (Underline)
 -------------
 
-###Characters
-                
-----
+2.0 Conceptual architecture model
+-------------
 
-~~Strikethrough~~ <s>Strikethrough (when enable html tag decode.)</s>
-*Italic*      _Italic_
-**Emphasis**  __Emphasis__
-***Emphasis Italic*** ___Emphasis Italic___
 
-Superscript: X<sub>2</sub>，Subscript: O<sup>2</sup>
+![](https://i.imgur.com/VLI7sTP.png) <center> Fig:1.1 - Architecture model </center>
 
-**Abbreviation(link HTML abbr tag)**
+The proposed conceptual solution architecture is based on a simplified yet
+holistic approach towards an unintrupted solution that can scale according to the client's requirements.
 
-The <abbr title="Hyper Text Markup Language">HTML</abbr> specification is maintained by the <abbr title="World Wide Web Consortium">W3C</abbr>.
+**<H3><u>Architecture Breakdown</u></H3>**
 
-###Blockquotes
+The architecture has the following components:
 
-> Blockquotes
+- **Resource Group**: A resource group is a logical container for Azure resources.
 
-Paragraphs and Line Breaks
-                    
-> "Blockquotes Blockquotes", [Link](http://localhost/)。
+- **App Service plan**: An App Service plan provides the managed virtual machines (VMs) that host your app. All apps associated with a plan run on the same VM instances. Therefore, In-order to deploy a service app, it is essential to configure the App Service plan first. 
 
-###Links
+- **Application Gateway**: Azure Application Gateway is a web traffic load balancer that enables the user to manage web applications. 
 
-[Links](http://localhost/)
+- **App Service app**: Azure App Service is a fully managed platform for creating and deploying cloud applications. Ability to use either docker containers or bare code.
 
-[Links with title](http://localhost/ "link title")
+- **Azure SQL Database**: SQL Database is a relational database-as-a-service in the cloud. SQL Database shares its code base with the Microsoft SQL Server database engine. Depending on your application requirements, you can also use Azure Database for MySQL or Azure Database for PostgreSQL. These are fully managed database services, based on the open-source MySQL Server and Postgres database engines, respectively.
 
-`<link>` : <https://github.com>
+- **Azure Virtual Network (VNet)**: Azure VNet is the fundamental building block for private IP network in azure. VNet brings with it additional benefits of Azure's infrastructure such as scale, availability, and isolation.
 
-[Reference link][id/name] 
+- **VPN Gateway**: A VPN gateway is a specific type of virtual network gateway that is used to send encrypted traffic between an Azure virtual network and an on-premises location over the public Internet. In this scenario, a VPN is established between the MySQL database and the on-premises to access the database.
 
-[id/name]: http://link-url/
+3.0 Implementation through Terraform
+-------------
+**What is Terraform?**
 
-GFM a-tail link @pandao
+- Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. Terraform can manage existing and popular service providers as well as custom in-house solutions.
 
-###Code Blocks (multi-language) & highlighting
+**Why use Terraform?**
+- Configuration files describe to Terraform the components needed to run a single application or your entire datacenter. Terraform generates an execution plan describing what it will do to reach the desired state, and then executes it to build the described infrastructure. As the configuration changes, Terraform is able to determine what changed and create incremental execution plans which can be applied.
 
-####Inline code
+- The infrastructure Terraform can manage includes low-level components such as compute instances, storage, and networking, as well as high-level components such as DNS entries, SaaS features, etc.
 
-`$ npm install marked`
+- Terraform was used for the implementation of this infrastructure as per the reasons mentioned above. 
+  
+<u>Sample code snippet</u>
 
-####Code Blocks (Indented style)
+```HCL
+#Service plan
+resource "azurerm_app_service_plan" "Techies-sp" {
+  name                = "Techies-sp"
+  location            = "${azurerm_resource_group.Techies-rg.location}"
+  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
+  reserved = true 
+  kind = "Linux"
 
-Indented 4 spaces, like `<pre>` (Preformatted Text).
-
-    <?php
-        echo "Hello world!";
-    ?>
-    
-Code Blocks (Preformatted text):
-
-    | First Header  | Second Header |
-    | ------------- | ------------- |
-    | Content Cell  | Content Cell  |
-    | Content Cell  | Content Cell  |
-
-####Javascript　
-
-```javascript
-function test(){
-	console.log("Hello world!");
+  sku {
+    tier = "Standard"
+    size = "S1"
+  }
 }
- 
-(function(){
-    var box = function(){
-        return box.fn.init();
-    };
 
-    box.prototype = box.fn = {
-        init : function(){
-            console.log('box.init()');
+#App Service
+resource "azurerm_app_service" "Techies-as" {
+  name                = "Techies-as"
+  location            = "${azurerm_resource_group.Techies-rg.location}"
+  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
+  app_service_plan_id = "${azurerm_app_service_plan.Techies-sp.id}"
 
-			return this;
-        },
+  site_config {
+    app_command_line = ""
+    linux_fx_version = "DOCKER|ravianxreaver/testnodeapp"
+  }
 
-		add : function(str){
-			alert("add", str);
-
-			return this;
-		},
-
-		remove : function(str){
-			alert("remove", str);
-
-			return this;
-		}
-    };
-    
-    box.fn.init.prototype = box.fn;
-    
-    window.box =box;
-})();
-
-var testBox = box();
-testBox.add("jQuery").remove("jQuery");
+  app_settings = {
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
+    "DOCKER_REGISTRY_SERVER_URL"          = "https://index.docker.io"
+  }
+}
 ```
-
-####HTML code
-
-```html
-<!DOCTYPE html>
-<html>
-    <head>
-        <mate charest="utf-8" />
-        <title>Hello world!</title>
-    </head>
-    <body>
-        <h1>Hello world!</h1>
-    </body>
-</html>
-```
-
-###Images
-
-Image:
-
-![](https://pandao.github.io/editor.md/examples/images/4.jpg)
-
-> Follow your heart.
-
-![](https://pandao.github.io/editor.md/examples/images/8.jpg)
-
-> 图为：厦门白城沙滩 Xiamen
-
-图片加链接 (Image + Link)：
-
-[![](https://pandao.github.io/editor.md/examples/images/7.jpg)](https://pandao.github.io/editor.md/examples/images/7.jpg "李健首张专辑《似水流年》封面")
-
-> 图为：李健首张专辑《似水流年》封面
-                
-----
-
-###Lists
-
-####Unordered list (-)
-
-- Item A
-- Item B
-- Item C
-     
-####Unordered list (*)
-
-* Item A
-* Item B
-* Item C
-
-####Unordered list (plus sign and nested)
-                
-+ Item A
-+ Item B
-    + Item B 1
-    + Item B 2
-    + Item B 3
-+ Item C
-    * Item C 1
-    * Item C 2
-    * Item C 3
-
-####Ordered list
-                
-1. Item A
-2. Item B
-3. Item C
-                
-----
-                    
-###Tables
-                    
-First Header  | Second Header
-------------- | -------------
-Content Cell  | Content Cell
-Content Cell  | Content Cell 
-
-| First Header  | Second Header |
-| ------------- | ------------- |
-| Content Cell  | Content Cell  |
-| Content Cell  | Content Cell  |
-
-| Function name | Description                    |
-| ------------- | ------------------------------ |
-| `help()`      | Display the help window.       |
-| `destroy()`   | **Destroy your computer!**     |
-
-| Item      | Value |
-| --------- | -----:|
-| Computer  | $1600 |
-| Phone     |   $12 |
-| Pipe      |    $1 |
-
-| Left-Aligned  | Center Aligned  | Right Aligned |
-| :------------ |:---------------:| -----:|
-| col 3 is      | some wordy text | $1600 |
-| col 2 is      | centered        |   $12 |
-| zebra stripes | are neat        |    $1 |
-                
-----
-
-####HTML entities
-
-&copy; &  &uml; &trade; &iexcl; &pound;
-&amp; &lt; &gt; &yen; &euro; &reg; &plusmn; &para; &sect; &brvbar; &macr; &laquo; &middot; 
-
-X&sup2; Y&sup3; &frac34; &frac14;  &times;  &divide;   &raquo;
-
-18&ordm;C  &quot;  &apos;
-
-##Escaping for Special Characters
-
-\*literal asterisks\*
-
-##Markdown extras
-
-###GFM task list
-
-- [x] GFM task list 1
-- [x] GFM task list 2
-- [ ] GFM task list 3
-    - [ ] GFM task list 3-1
-    - [ ] GFM task list 3-2
-    - [ ] GFM task list 3-3
-- [ ] GFM task list 4
-    - [ ] GFM task list 4-1
-    - [ ] GFM task list 4-2
-
-###Emoji mixed :smiley:
-
-> Blockquotes :star:
-
-####GFM task lists & Emoji & fontAwesome icon emoji & editormd logo emoji :editormd-logo-5x:
-
-- [x] :smiley: @mentions, :smiley: #refs, [links](), **formatting**, and <del>tags</del> supported :editormd-logo:;
-- [x] list syntax required (any unordered or ordered list supported) :editormd-logo-3x:;
-- [x] [ ] :smiley: this is a complete item :smiley:;
-- [ ] []this is an incomplete item [test link](#) :fa-star: @pandao; 
-- [ ] [ ]this is an incomplete item :fa-star: :fa-gear:;
-    - [ ] :smiley: this is an incomplete item [test link](#) :fa-star: :fa-gear:;
-    - [ ] :smiley: this is  :fa-star: :fa-gear: an incomplete item [test link](#);
-            
-###TeX(LaTeX)
-   
-$$E=mc^2$$
-
-Inline $$E=mc^2$$ Inline，Inline $$E=mc^2$$ Inline。
-
-$$\(\sqrt{3x-1}+(1+x)^2\)$$
-                    
-$$\sin(\alpha)^{\theta}=\sum_{i=0}^{n}(x^i + \cos(f))$$
-                
-###FlowChart
-
-```flow
-st=>start: Login
-op=>operation: Login operation
-cond=>condition: Successful Yes or No?
-e=>end: To admin
-
-st->op->cond
-cond(yes)->e
-cond(no)->op
-```
-
-###Sequence Diagram
-                    
-```seq
-Andrew->China: Says Hello 
-Note right of China: China thinks\nabout it 
-China-->Andrew: How are you? 
-Andrew->>China: I am good thanks!
-```
-
-###End
