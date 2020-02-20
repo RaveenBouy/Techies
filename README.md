@@ -82,3 +82,41 @@ resource "azurerm_app_service" "Techies-as" {
   }
 }
 ```
+
+The below sample code snippet is responsible for creating a Service plan named as "Techies-sp" with a sku of S1 Standard.
+```HCL
+#Service plan
+resource "azurerm_app_service_plan" "Techies-sp" {
+  name                = "Techies-sp"
+  location            = "${azurerm_resource_group.Techies-rg.location}"
+  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
+  reserved = true 
+  kind = "Linux"
+
+  sku {
+    tier = "Standard"
+    size = "S1"
+  }
+}
+```
+
+The below sample code snippet creates a web app service using the service plan which is created by the code snippet above
+```HCL
+#App Service
+resource "azurerm_app_service" "Techies-as" {
+  name                = "Techies-as"
+  location            = "${azurerm_resource_group.Techies-rg.location}"
+  resource_group_name = "${azurerm_resource_group.Techies-rg.name}"
+  app_service_plan_id = "${azurerm_app_service_plan.Techies-sp.id}"
+
+  site_config {
+    app_command_line = ""
+    linux_fx_version = "DOCKER|ravianxreaver/testnodeapp"
+  }
+
+  app_settings = {
+    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
+    "DOCKER_REGISTRY_SERVER_URL"          = "https://index.docker.io"
+  }
+}
+```
