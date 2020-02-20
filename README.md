@@ -82,8 +82,10 @@ resource "azurerm_app_service" "Techies-as" {
   }
 }
 ```
+Snippet:1.0
 
-The below sample code snippet is responsible for creating a Service plan named as "Techies-sp" with a sku of S1 Standard.
+
+The sample code snippet is responsible for creating a Service plan named as "Techies-sp" with a sku of S1 Standard.
 ```HCL
 #Service plan
 resource "azurerm_app_service_plan" "Techies-sp" {
@@ -99,8 +101,10 @@ resource "azurerm_app_service_plan" "Techies-sp" {
   }
 }
 ```
+Snippet:1.1
 
-The below sample code snippet creates a web app service using the service plan which is created by the code snippet above
+
+The sample code snippet creates a web app service using the service plan("Techies-sp") which is created by the code snippet:1.1
 ```HCL
 #App Service
 resource "azurerm_app_service" "Techies-as" {
@@ -120,3 +124,4 @@ resource "azurerm_app_service" "Techies-as" {
   }
 }
 ```
+Snippet:1.2
