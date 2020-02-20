@@ -26,7 +26,7 @@ The architecture has the following components:
 
 - **Application Gateway**: Azure Application Gateway is a web traffic load balancer that enables the user to manage web applications. 
 
-- **App Service app**: Azure App Service is a fully managed platform for creating and deploying cloud applications. Ability to use either docker containers or bare code.
+- **App Service app**: Azure App Service is a fully managed platform for creating and deploying cloud applications. Ability to use either docker containers or bare code. The application build for this scenario is based on Node.JS and is deployed as a docker container which could only be accessible by port 80.
 
 - **Azure SQL Database**: SQL Database is a relational database-as-a-service in the cloud. SQL Database shares its code base with the Microsoft SQL Server database engine. Depending on your application requirements, you can also use Azure Database for MySQL or Azure Database for PostgreSQL. These are fully managed database services, based on the open-source MySQL Server and Postgres database engines, respectively.
 
