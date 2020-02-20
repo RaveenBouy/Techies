@@ -47,7 +47,7 @@ The architecture has the following components:
 
 - Terraform was used for the implementation of this infrastructure as per the reasons mentioned above. 
   
-<u>Sample code snippet</u>
+<b><u>Sample code snippet</u></b>
 
 ```HCL
 #Service plan
@@ -82,7 +82,7 @@ resource "azurerm_app_service" "Techies-as" {
   }
 }
 ```
-Snippet:1.0
+<u>Snippet:1.0<u/>
 
 
 The sample code snippet is responsible for creating a Service plan named as "Techies-sp" with a sku of S1 Standard.
@@ -101,7 +101,7 @@ resource "azurerm_app_service_plan" "Techies-sp" {
   }
 }
 ```
-Snippet:1.1
+<u>Snippet:1.1</u>
 
 
 The sample code snippet creates a web app service using the service plan("Techies-sp") which is created by the code snippet:1.1
@@ -124,4 +124,4 @@ resource "azurerm_app_service" "Techies-as" {
   }
 }
 ```
-Snippet:1.2
+<u>Snippet:1.2</u>
